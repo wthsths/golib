@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	u_http "golib/http"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	gl_http "github.com/payports/golib/http"
 )
 
 type proxyClient struct {
@@ -51,7 +52,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		if onErr != nil {
 			onErr(fmt.Errorf("path is not allowed: %s", uri))
 		}
-		writtenRes, err := u_http.WriteCustomJsonResponse(w, http.StatusUnauthorized, map[string]interface{}{
+		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusUnauthorized, map[string]interface{}{
 			"message": "unauthorized call",
 		})
 		if err != nil && onErr != nil {
@@ -69,7 +70,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		if onErr != nil {
 			onErr(fmt.Errorf("unable to parse URL: '%s' error: %w", redirectUrl, err))
 		}
-		writtenRes, err := u_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
 		if err != nil && onErr != nil {
@@ -86,7 +87,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		if onErr != nil {
 			onErr(fmt.Errorf("error reading request body: %w", err))
 		}
-		writtenRes, err := u_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
 		if err != nil && onErr != nil {
@@ -118,7 +119,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		if onErr != nil {
 			onErr(fmt.Errorf("error executing http request: %w", err))
 		}
-		writtenRes, err := u_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
 		if err != nil && onErr != nil {
@@ -136,7 +137,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		if onErr != nil {
 			onErr(fmt.Errorf("error reading response payload: %w", err))
 		}
-		writtenRes, err := u_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
 		if err != nil && onErr != nil {
@@ -160,7 +161,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		if onErr != nil {
 			onErr(fmt.Errorf("error writing server response for client: %w", err))
 		}
-		writtenRes, err := u_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
 		if err != nil && onErr != nil {
@@ -184,7 +185,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 			if onErr != nil {
 				onErr(fmt.Errorf("error creating gzip reader: %w", err))
 			}
-			writtenRes, err := u_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+			writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 				"message": "internal error",
 			})
 			if err != nil && onErr != nil {
@@ -201,7 +202,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 			if onErr != nil {
 				onErr(fmt.Errorf("error reading from gzip reader: %w", err))
 			}
-			writtenRes, err := u_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+			writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 				"message": "internal error",
 			})
 			if err != nil && onErr != nil {
