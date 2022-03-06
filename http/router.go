@@ -14,6 +14,7 @@ type router struct {
 }
 
 // NewRouter creates http router from input routeRules.
+//
 // It will return error upon invalid data.
 func NewRouter(routeRules []*RouteRule) (*router, error) {
 	router := &router{
@@ -44,11 +45,12 @@ func NewRouter(routeRules []*RouteRule) (*router, error) {
 	return router, nil
 }
 
-// FindMatch can be used inside a http.Handle() to check if incoming request complies with any of the routing rules.
+// FindMatch can be used inside a http.Handle() to check if incoming request matches with any of the routing rules.
 // It returns routeTo func of the match.
 // It also extracts and returns route parameters from named regex groups.
 //
 // E.g: Input path: `/Transfer/(?P<guid>\S+)`
+//
 // Request: `/Transfer/abcdef` will register "guid"="abcdef" to routeParams.
 func (rt *router) FindMatch(r *go_http.Request) (routeTo func(w go_http.ResponseWriter, r *go_http.Request, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
@@ -78,6 +80,7 @@ func (rt *router) FindMatch(r *go_http.Request) (routeTo func(w go_http.Response
 // RouteRule is used for registering rules to Router.
 // Any request path with route parameters in it should be registered as named regex group.
 // Also they should be registered as DynamicPath=true.
+//
 // Example path:  `/Transfer/(?P<guid>\S+)`
 //
 // Query parameters in a url are ignored during checking.
@@ -86,7 +89,7 @@ type RouteRule struct {
 	Method string
 	Path   string
 	// DynamicPath should be set to true if endpoint has route parameters in it.
-	// Query parameters however are not considered as a part of dynamic path.
+	// Query parameters however are NOT considered as a part of dynamic path.
 	DynamicPath  bool
 	RequiresAuth bool
 	RouteTo      func(w go_http.ResponseWriter, r *go_http.Request, routeParams map[string]string)

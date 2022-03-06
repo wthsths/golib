@@ -10,7 +10,8 @@ type RouteTable struct {
 }
 
 // NewRouteTable checks validity of input routeRules.
-// Route rules must contain have regex compatible path values.
+//
+// Note that route rules must contain have regex compatible path values.
 func NewRouteTable(routeRules []*RouteRule) (*RouteTable, error) {
 	table := &RouteTable{
 		routeRules: routeRules,

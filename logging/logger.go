@@ -32,7 +32,9 @@ type Logger interface {
 }
 
 // Init globally prepares logger for runtime.
-// Must pass without errors to be able to write to stderr and file system.
+// Must finish without errors to be able to write to stderr and file system.
+//
+// Creating a logger instance before the execution of Init will produce a panic.
 func Init(name, dir string) error {
 	err := glogInit(name, dir)
 	if err != nil {
@@ -47,7 +49,8 @@ type sessionLogger struct {
 	sessionID string
 }
 
-// NewSessionLogger creates new logger instance with a unique ID.
+// NewSessionLogger creates new logger instance with a internally generated unique ID.
+//
 // Created instance can be passed accross application layers for structed session logging.
 //
 // Example log output when Fatalf("fatal error!") is called.
@@ -64,7 +67,8 @@ func NewSessionLogger() *sessionLogger {
 }
 
 // NewSessionLoggerWithCustomID creates a logger instance with given input ID value.
-// Input value will override the interbally generated session ID value.
+//
+// Input value will override the internally generated session ID value.
 func NewSessionLoggerWithCustomID(id string) *sessionLogger {
 	if !isInitialized {
 		panic("Logger is not initialized yet. logging.Init() must be executed first.")

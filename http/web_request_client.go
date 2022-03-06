@@ -16,7 +16,7 @@ type webRequestClient struct {
 	unmarshalFunc func(data []byte, v interface{}) error
 }
 
-// NewWebRequestClient cretes a wrapper utility which handles http communication.
+// NewWebRequestClient creates a wrapper utility which handles http communication.
 func NewWebRequestClient(client *go_http.Client, marshalFunc func(v interface{}) ([]byte, error), unmarshalFunc func(data []byte, v interface{}) error) *webRequestClient {
 	return &webRequestClient{
 		client:        client,
@@ -68,6 +68,7 @@ func (w *webRequestClient) Get(ctx context.Context, uri string, headers map[stri
 }
 
 // Post sends a POST http request using a struct as payload.
+//
 // Use PostSerializedBody method if your payload input is string.
 func (w *webRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders go_http.Header, resBody interface{}, statusCode int, err error) {
 	reqAsBytes, err := w.marshalFunc(request)

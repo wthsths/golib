@@ -1,7 +1,8 @@
 package maps
 
 // OrderedStrMap wraps a map and a slice to keep track of insertion order of the map entries.
-// Cache and loop with OrderedKeys() method for insertion-time-ordered access.
+//
+// Loop through map with OrderedKeys() for insertion-time-ordered access.
 type OrderedStrMap struct {
 	innerMap map[string]string
 	keys     []string
