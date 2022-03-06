@@ -63,6 +63,18 @@ func NewSessionLogger() *sessionLogger {
 	}
 }
 
+// NewSessionLoggerWithCustomID creates a logger instance with given input ID value.
+// Input value will override the interbally generated session ID value.
+func NewSessionLoggerWithCustomID(id string) *sessionLogger {
+	if !isInitialized {
+		panic("Logger is not initialized yet. logging.Init() must be executed first.")
+	}
+
+	return &sessionLogger{
+		sessionID: id,
+	}
+}
+
 func (l *sessionLogger) Infof(format string, args ...interface{}) {
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeInfo, formatted)
