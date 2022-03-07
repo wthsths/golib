@@ -27,7 +27,7 @@ func VerifyHostCertificate(host string, port int) error {
 	return nil
 }
 
-func VerifySelfSignedCertificate(host string, port int, certPem []byte) error {
+func VerifySelfSignedCertificate(hostAddr string, certPem []byte) error {
 	rootCAs, _ := x509.SystemCertPool()
 	if rootCAs == nil {
 		rootCAs = x509.NewCertPool()
@@ -44,12 +44,10 @@ func VerifySelfSignedCertificate(host string, port int, certPem []byte) error {
 	transport := &go_http.Transport{TLSClientConfig: config}
 	httpCli := &go_http.Client{Transport: transport}
 
-	uri := fmt.Sprintf("https://%s:%d", host, port)
-
-	req, _ := go_http.NewRequest(go_http.MethodGet, uri, nil)
+	req, _ := go_http.NewRequest(go_http.MethodGet, hostAddr, nil)
 	_, err := httpCli.Do(req)
 	if err != nil {
-		return fmt.Errorf("call to %s failed: %w", uri, err)
+		return fmt.Errorf("call to %s failed: %w", hostAddr, err)
 	}
 	return nil
 }
