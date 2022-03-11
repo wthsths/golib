@@ -77,6 +77,32 @@ func (rt *router) FindMatch(r *go_http.Request) (routeTo func(w go_http.Response
 	return nil, false, nil
 }
 
+// HasMatch returns true if input request matches with any of the registered routed rules.
+func (rt *router) HasMatch(r *go_http.Request) bool {
+	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
+	staticRoute := rt.staticPaths[queryStrippedPath]
+	if staticRoute != nil && staticRoute.Method == r.Method {
+		return true
+	}
+
+	for _, v := range rt.dynamicPaths {
+		matchDynamicPath := v.regex.MatchString(queryStrippedPath)
+		if matchDynamicPath && v.Method == r.Method {
+			result := make(map[string]string)
+			match := v.regex.FindStringSubmatch(queryStrippedPath)
+			for i, name := range v.regex.SubexpNames() {
+				if i != 0 && name != "" {
+					result[name] = match[i]
+				}
+			}
+
+			return true
+		}
+	}
+
+	return false
+}
+
 // RouteRule is used for registering rules to Router.
 // Any request path with route parameters in it should be registered as named regex group.
 // Also they should be registered as DynamicPath=true.
