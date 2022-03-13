@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/teris-io/shortid"
 )
 
 const (
@@ -18,8 +18,9 @@ const (
 )
 
 var isInitialized = false
+var shortIDGenerator *shortid.Shortid
 
-// "glog" implementation is built upon: "https://github.com/birlesikodeme/glog"
+/* "glog" implementation is built upon: "https://github.com/birlesikodeme/glog" */
 
 // Logger is an abstract representation of sessionLogger.
 //
@@ -41,28 +42,39 @@ func Init(name, dir string) error {
 		return err
 	}
 
+	shortIDGenerator, err = shortid.New(1, shortid.DefaultABC, 2342)
+	if err != nil {
+		return fmt.Errorf("unable to initialize short ID generator: %w", err)
+	}
+
 	isInitialized = true
 	return nil
 }
 
 type sessionLogger struct {
 	sessionID string
+	title     string
 }
 
 // NewSessionLogger creates new logger instance with a internally generated unique ID.
 //
 // Created instance can be passed accross application layers for structed session logging.
 //
-// Example log output when Fatalf("fatal error!") is called.
+// Example log output when Fatalf("fatal error!") is called:
 //
-// [2022-02-27 17:58:03.565][7cc2d15b-6069-495c-9f84-89c4ba4c5566][FATAL]: fatal error!
+// [2022-02-27 17:58:03.565][KFTGcuiQ9p][][FATAL]: fatal error!
+//
+// If SetTitle("title") was called prior to logging, output will be as follows:
+//
+// [2022-02-27 17:58:03.565][KFTGcuiQ9p][title][FATAL]: fatal error!
 func NewSessionLogger() *sessionLogger {
 	if !isInitialized {
 		panic("Logger is not initialized yet. logging.Init() must be executed first.")
 	}
 
+	generatedID, _ := shortIDGenerator.Generate()
 	return &sessionLogger{
-		sessionID: uuid.NewString(),
+		sessionID: generatedID,
 	}
 }
 
@@ -103,6 +115,15 @@ func (l *sessionLogger) Fatalf(format string, args ...interface{}) {
 	fatalln(log)
 }
 
+// SetTitle adds title text which will be displayed in title bracket in logs.
+//
+// If SetTitle("title") was called prior to logging, output will be as follows:
+//
+// [2022-02-27 17:58:03.565][KFTGcuiQ9p][title][FATAL]: fatal error!
+func (l *sessionLogger) SetTitle(input string) {
+	l.title = input
+}
+
 func (l *sessionLogger) getStructuredLog(logType, content string) string {
 	pc, filename, line, _ := runtime.Caller(2)
 
@@ -112,5 +133,5 @@ func (l *sessionLogger) getStructuredLog(logType, content string) string {
 	}
 
 	logTime := time.Now().UTC().Format("2006-01-02 15:04:05.000")
-	return fmt.Sprintf("[%s][%s][%s]: %s %s", logTime, l.sessionID, logType, content, logSuffix)
+	return fmt.Sprintf("[%s][%s][%s][%s]: %s %s", logTime, l.sessionID, l.title, logType, content, logSuffix)
 }
