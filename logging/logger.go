@@ -26,6 +26,13 @@ var shortIDGenerator *shortid.Shortid
 //
 // Actual implementation is built upon a modified version of glog.
 type Logger interface {
+	// SetTitle adds title text which will be displayed in title bracket in logs.
+	//
+	// If SetTitle("title") was called prior to logging, output will be as follows:
+	//
+	// [2022-02-27 17:58:03.565][KFTGcuiQ9p][title][FATAL]: fatal error!
+	SetTitle(input string)
+
 	Infof(format string, args ...interface{})
 	Warnf(format string, args ...interface{})
 	Errorf(format string, args ...interface{})
@@ -91,6 +98,10 @@ func NewSessionLoggerWithCustomID(id string) *sessionLogger {
 	}
 }
 
+func (l *sessionLogger) SetTitle(input string) {
+	l.title = input
+}
+
 func (l *sessionLogger) Infof(format string, args ...interface{}) {
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeInfo, formatted)
@@ -113,15 +124,6 @@ func (l *sessionLogger) Fatalf(format string, args ...interface{}) {
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeFatal, formatted)
 	fatalln(log)
-}
-
-// SetTitle adds title text which will be displayed in title bracket in logs.
-//
-// If SetTitle("title") was called prior to logging, output will be as follows:
-//
-// [2022-02-27 17:58:03.565][KFTGcuiQ9p][title][FATAL]: fatal error!
-func (l *sessionLogger) SetTitle(input string) {
-	l.title = input
 }
 
 func (l *sessionLogger) getStructuredLog(logType, content string) string {
