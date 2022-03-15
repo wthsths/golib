@@ -51,7 +51,7 @@ func (w *webRequestClient) Get(ctx context.Context, uri string, headers map[stri
 		return nil, nil, 0, errStr
 	}
 
-	httpRes.Body.Close()
+	defer httpRes.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(httpRes.Body)
 	if err != nil {
