@@ -11,16 +11,23 @@ type RouteTable struct {
 
 // NewRouteTable checks validity of input routeRules.
 //
-// Note that route rules must contain have regex compatible path values.
+// Note that rules for paths with route parameters must be defined with curly brackets.
+//
+// E.g: /Transfer/{guid}
 func NewRouteTable(routeRules []*RouteRule) (*RouteTable, error) {
 	table := &RouteTable{
 		routeRules: routeRules,
 	}
-	var err error
+
 	for _, e := range table.routeRules {
-		e.regexp, err = regexp.Compile(e.path)
+		regexConv, err := RouteToRegExp(e.path)
 		if err != nil {
-			return nil, fmt.Errorf("can not compile: '%s': %w", e.path, err)
+			return nil, fmt.Errorf("invalid path definition: '%s'", e.path)
+		}
+
+		e.regexp, err = regexp.Compile(regexConv)
+		if err != nil {
+			return nil, fmt.Errorf("can not compile: '%s': %s", e.path, err.Error())
 		}
 	}
 	return table, nil
@@ -33,6 +40,10 @@ type RouteRule struct {
 }
 
 // NewRouteRule creates a single entry for RouteTable.
+//
+// Note that rules for paths with route parameters must be defined with curly brackets.
+//
+// E.g: /Transfer/{guid}
 func NewRouteRule(method, path string) *RouteRule {
 	return &RouteRule{
 		method: method,

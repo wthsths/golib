@@ -35,6 +35,10 @@ type proxyClient struct {
 //
 // Hooks will contain a second string value which represents session ID.
 // Events which output the same session ID belong to same http session.
+//
+// RouteTable entries with route parameters can be defined in following fashion:
+//
+// E.g.: /Transfer/{guid}
 func NewProxyClient(routeTable *RouteTable, routeUrl string, httpCli *http.Client, onErr func(error, string), onReqRead func([]byte, string), onResRead func([]byte, string)) *proxyClient {
 	return &proxyClient{
 		routeTable: routeTable,
@@ -58,7 +62,27 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		if e.method != r.Method {
 			continue
 		}
-		if e.regexp.MatchString(uri) {
+
+		regexConv, err := RouteToRegExp(uri)
+		if err != nil {
+			if pc.onErr != nil {
+				pc.onErr(err, sessionID)
+			}
+			writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+				"message": "internal server error",
+			})
+			if err != nil {
+				if pc.onErr != nil {
+					pc.onErr(err, sessionID)
+				}
+				return
+			}
+			if pc.onResRead != nil {
+				pc.onReqRead(writtenRes, sessionID)
+			}
+		}
+
+		if e.regexp.MatchString(regexConv) {
 			isAllowed = true
 			break
 		}
@@ -71,8 +95,11 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusUnauthorized, map[string]interface{}{
 			"message": "unauthorized call",
 		})
-		if err != nil && pc.onErr != nil {
-			pc.onErr(fmt.Errorf("write response error: %w", err), sessionID)
+		if err != nil {
+			if pc.onErr != nil {
+				pc.onErr(fmt.Errorf("write response error: %s", err.Error()), sessionID)
+			}
+			return
 		}
 		if pc.onResRead != nil {
 			pc.onResRead(writtenRes, sessionID)
@@ -84,13 +111,16 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 	parsedRedirectUrl, err := url.Parse(redirectUrl)
 	if err != nil {
 		if pc.onErr != nil {
-			pc.onErr(fmt.Errorf("unable to parse URL: '%s' error: %w", redirectUrl, err), sessionID)
+			pc.onErr(fmt.Errorf("unable to parse URL: '%s' error: %s", redirectUrl, err.Error()), sessionID)
 		}
 		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
-		if err != nil && pc.onErr != nil {
-			pc.onErr(fmt.Errorf("write response error: %w", err), sessionID)
+		if err != nil {
+			if pc.onErr != nil {
+				pc.onErr(fmt.Errorf("write response error: %s", err.Error()), sessionID)
+			}
+			return
 		}
 		if pc.onResRead != nil {
 			pc.onResRead(writtenRes, sessionID)
@@ -101,13 +131,16 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 	reqBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		if pc.onErr != nil {
-			pc.onErr(fmt.Errorf("error reading request body: %w", err), sessionID)
+			pc.onErr(fmt.Errorf("error reading request body: %s", err.Error()), sessionID)
 		}
 		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
-		if err != nil && pc.onErr != nil {
-			pc.onErr(fmt.Errorf("write response error: %w", err), sessionID)
+		if err != nil {
+			if pc.onErr != nil {
+				pc.onErr(fmt.Errorf("write response error: %s", err.Error()), sessionID)
+			}
+			return
 		}
 		if pc.onResRead != nil {
 			pc.onResRead(writtenRes, sessionID)
@@ -133,13 +166,16 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 	res, err := pc.httpCli.Do(httpReq)
 	if err != nil {
 		if pc.onErr != nil {
-			pc.onErr(fmt.Errorf("error executing http request: %w", err), sessionID)
+			pc.onErr(fmt.Errorf("error executing http request: %s", err.Error()), sessionID)
 		}
 		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
-		if err != nil && pc.onErr != nil {
-			pc.onErr(fmt.Errorf("write response error: %w", err), sessionID)
+		if err != nil {
+			if pc.onErr != nil {
+				pc.onErr(fmt.Errorf("write response error: %s", err.Error()), sessionID)
+			}
+			return
 		}
 		if pc.onResRead != nil {
 			pc.onResRead(writtenRes, sessionID)
@@ -151,13 +187,16 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 	resBytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		if pc.onErr != nil {
-			pc.onErr(fmt.Errorf("error reading response payload: %w", err), sessionID)
+			pc.onErr(fmt.Errorf("error reading response payload: %s", err.Error()), sessionID)
 		}
 		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
-		if err != nil && pc.onErr != nil {
-			pc.onErr(fmt.Errorf("write response error: %w", err), sessionID)
+		if err != nil {
+			if pc.onErr != nil {
+				pc.onErr(fmt.Errorf("write response error: %s", err.Error()), sessionID)
+			}
+			return
 		}
 		if pc.onResRead != nil {
 			pc.onResRead(writtenRes, sessionID)
@@ -175,13 +214,16 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 	_, err = w.Write(resBytes)
 	if err != nil {
 		if pc.onErr != nil {
-			pc.onErr(fmt.Errorf("error writing server response for client: %w", err), sessionID)
+			pc.onErr(fmt.Errorf("error writing server response for client: %s", err.Error()), sessionID)
 		}
 		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal error",
 		})
-		if err != nil && pc.onErr != nil {
-			pc.onErr(fmt.Errorf("write response error: %w", err), sessionID)
+		if err != nil {
+			if pc.onErr != nil {
+				pc.onErr(fmt.Errorf("write response error: %s", err.Error()), sessionID)
+			}
+			return
 		}
 		if pc.onResRead != nil {
 			pc.onResRead(writtenRes, sessionID)
@@ -199,13 +241,16 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		gzipReader, err := gzip.NewReader(reader)
 		if err != nil {
 			if pc.onErr != nil {
-				pc.onErr(fmt.Errorf("error creating gzip reader: %w", err), sessionID)
+				pc.onErr(fmt.Errorf("error creating gzip reader: %s", err.Error()), sessionID)
 			}
 			writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 				"message": "internal error",
 			})
-			if err != nil && pc.onErr != nil {
-				pc.onErr(fmt.Errorf("write response error: %w", err), sessionID)
+			if err != nil {
+				if pc.onErr != nil {
+					pc.onErr(fmt.Errorf("write response error: %s", err.Error()), sessionID)
+				}
+				return
 			}
 			if pc.onResRead != nil {
 				pc.onResRead(writtenRes, sessionID)
@@ -216,13 +261,16 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		resBytes, err = ioutil.ReadAll(gzipReader)
 		if err != nil {
 			if pc.onErr != nil {
-				pc.onErr(fmt.Errorf("error reading from gzip reader: %w", err), sessionID)
+				pc.onErr(fmt.Errorf("error reading from gzip reader: %s", err.Error()), sessionID)
 			}
 			writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
 				"message": "internal error",
 			})
-			if err != nil && pc.onErr != nil {
-				pc.onErr(fmt.Errorf("write response error: %w", err), sessionID)
+			if err != nil {
+				if pc.onErr != nil {
+					pc.onErr(fmt.Errorf("write response error: %s", err.Error()), sessionID)
+				}
+				return
 			}
 			if pc.onResRead != nil {
 				pc.onResRead(writtenRes, sessionID)

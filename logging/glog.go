@@ -877,10 +877,10 @@ func glogInit(name, dir string) error {
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("unable to create log directory: %w", err)
+			return fmt.Errorf("unable to create log directory: %s", err.Error())
 		}
 	} else if err != nil {
-		return fmt.Errorf("unable to create log directory: %w", err)
+		return fmt.Errorf("unable to create log directory: %s", err.Error())
 	}
 	return nil
 }

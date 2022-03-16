@@ -35,7 +35,7 @@ func NewRouter(routeRules []*RouteRule) (*router, error) {
 		} else {
 			compiled, err := regexp.Compile(r.Path)
 			if err != nil {
-				return nil, fmt.Errorf("unable parse dynamic path: '%s' error: %w", r.Path, err)
+				return nil, fmt.Errorf("unable parse dynamic path: '%s' error: %s", r.Path, err.Error())
 			}
 			r.regex = compiled
 			router.dynamicPaths = append(router.dynamicPaths, r)

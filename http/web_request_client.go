@@ -37,7 +37,7 @@ func (w *webRequestClient) Get(ctx context.Context, uri string, headers map[stri
 
 	httpReq, err := go_http.NewRequestWithContext(ctx, "GET", uri, nil)
 	if err != nil {
-		errStr := fmt.Errorf("could not create new request: %w", err)
+		errStr := fmt.Errorf("could not create new request: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
@@ -47,7 +47,7 @@ func (w *webRequestClient) Get(ctx context.Context, uri string, headers map[stri
 
 	httpRes, err := w.client.Do(httpReq)
 	if err != nil {
-		errStr := fmt.Errorf("error executing request: %w", err)
+		errStr := fmt.Errorf("error executing request: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
@@ -55,13 +55,13 @@ func (w *webRequestClient) Get(ctx context.Context, uri string, headers map[stri
 
 	bodyBytes, err := ioutil.ReadAll(httpRes.Body)
 	if err != nil {
-		errStr := fmt.Errorf("could not read response body: %w", err)
+		errStr := fmt.Errorf("could not read response body: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
 	err = w.unmarshalFunc(bodyBytes, responseParser)
 	if err != nil {
-		errStr := fmt.Errorf("could not unmarshal response into input interface: %w", err)
+		errStr := fmt.Errorf("could not unmarshal response into input interface: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 	return httpRes.Header, responseParser, httpRes.StatusCode, nil
@@ -73,7 +73,7 @@ func (w *webRequestClient) Get(ctx context.Context, uri string, headers map[stri
 func (w *webRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders go_http.Header, resBody interface{}, statusCode int, err error) {
 	reqAsBytes, err := w.marshalFunc(request)
 	if err != nil {
-		errStr := fmt.Errorf("could not convert request to byte array: %w", err)
+		errStr := fmt.Errorf("could not convert request to byte array: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
@@ -87,7 +87,7 @@ func (w *webRequestClient) Post(ctx context.Context, uri string, headers map[str
 
 	httpReq, err := go_http.NewRequestWithContext(ctx, "POST", uri, bytes.NewBuffer(reqAsBytes))
 	if err != nil {
-		errStr := fmt.Errorf("could not create new request: %w", err)
+		errStr := fmt.Errorf("could not create new request: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
@@ -97,7 +97,7 @@ func (w *webRequestClient) Post(ctx context.Context, uri string, headers map[str
 
 	httpRes, err := w.client.Do(httpReq)
 	if err != nil {
-		errStr := fmt.Errorf("error executing request: %w", err)
+		errStr := fmt.Errorf("error executing request: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
@@ -105,13 +105,13 @@ func (w *webRequestClient) Post(ctx context.Context, uri string, headers map[str
 
 	bodyBytes, err := ioutil.ReadAll(httpRes.Body)
 	if err != nil {
-		errStr := fmt.Errorf("could not read response body: %w", err)
+		errStr := fmt.Errorf("could not read response body: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
 	err = w.unmarshalFunc(bodyBytes, responseParser)
 	if err != nil {
-		errStr := fmt.Errorf("could not unmarshal response into input interface: %w", err)
+		errStr := fmt.Errorf("could not unmarshal response into input interface: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 	return httpRes.Header, responseParser, httpRes.StatusCode, nil
@@ -129,7 +129,7 @@ func (w *webRequestClient) PostSerializedBody(ctx context.Context, uri string, h
 
 	httpReq, err := go_http.NewRequestWithContext(ctx, "POST", uri, bytes.NewBuffer([]byte(request)))
 	if err != nil {
-		errStr := fmt.Errorf("could not create new request: %w", err)
+		errStr := fmt.Errorf("could not create new request: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
@@ -139,7 +139,7 @@ func (w *webRequestClient) PostSerializedBody(ctx context.Context, uri string, h
 
 	httpRes, err := w.client.Do(httpReq)
 	if err != nil {
-		errStr := fmt.Errorf("error executing request: %w", err)
+		errStr := fmt.Errorf("error executing request: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
@@ -147,13 +147,13 @@ func (w *webRequestClient) PostSerializedBody(ctx context.Context, uri string, h
 
 	bodyBytes, err := ioutil.ReadAll(httpRes.Body)
 	if err != nil {
-		errStr := fmt.Errorf("could not read response body: %w", err)
+		errStr := fmt.Errorf("could not read response body: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 
 	err = w.unmarshalFunc(bodyBytes, responseParser)
 	if err != nil {
-		errStr := fmt.Errorf("could not unmarshal response into input interface: %w", err)
+		errStr := fmt.Errorf("could not unmarshal response into input interface: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
 	return httpRes.Header, responseParser, httpRes.StatusCode, nil

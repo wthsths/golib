@@ -11,12 +11,12 @@ import (
 func VerifyHostCertificate(host string, port int) error {
 	conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%d", host, port), nil)
 	if err != nil {
-		return fmt.Errorf("server does not support tls certificate: %w", err)
+		return fmt.Errorf("server does not support tls certificate: %s", err.Error())
 	}
 
 	err = conn.VerifyHostname(host)
 	if err != nil {
-		return fmt.Errorf("hostname does not match with the certificate: %w", err)
+		return fmt.Errorf("hostname does not match with the certificate: %s", err.Error())
 	}
 
 	expiry := conn.ConnectionState().PeerCertificates[0].NotAfter
@@ -47,7 +47,7 @@ func VerifySelfSignedCertificate(hostAddr string, certPem []byte) error {
 	req, _ := go_http.NewRequest(go_http.MethodGet, hostAddr, nil)
 	_, err := httpCli.Do(req)
 	if err != nil {
-		return fmt.Errorf("call to %s failed: %w", hostAddr, err)
+		return fmt.Errorf("call to %s failed: %s", hostAddr, err.Error())
 	}
 	return nil
 }

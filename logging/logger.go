@@ -51,7 +51,7 @@ func Init(name, dir string) error {
 
 	shortIDGenerator, err = shortid.New(1, shortid.DefaultABC, 2342)
 	if err != nil {
-		return fmt.Errorf("unable to initialize short ID generator: %w", err)
+		return fmt.Errorf("unable to initialize short ID generator: %s", err.Error())
 	}
 
 	isInitialized = true
