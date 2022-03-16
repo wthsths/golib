@@ -6,7 +6,7 @@ import (
 )
 
 type RouteTable struct {
-	routeRules []*RouteRule
+	routeRules []*ProxyRouteRule
 }
 
 // NewRouteTable checks validity of input routeRules.
@@ -14,7 +14,7 @@ type RouteTable struct {
 // Note that rules for paths with route parameters must be defined with curly brackets.
 //
 // E.g: /Transfer/{guid}
-func NewRouteTable(routeRules []*RouteRule) (*RouteTable, error) {
+func NewRouteTable(routeRules []*ProxyRouteRule) (*RouteTable, error) {
 	table := &RouteTable{
 		routeRules: routeRules,
 	}
@@ -33,7 +33,7 @@ func NewRouteTable(routeRules []*RouteRule) (*RouteTable, error) {
 	return table, nil
 }
 
-type RouteRule struct {
+type ProxyRouteRule struct {
 	method string
 	path   string
 	regexp *regexp.Regexp
@@ -44,21 +44,21 @@ type RouteRule struct {
 // Note that rules for paths with route parameters must be defined with curly brackets.
 //
 // E.g: /Transfer/{guid}
-func NewRouteRule(method, path string) *RouteRule {
-	return &RouteRule{
+func NewRouteRule(method, path string) *ProxyRouteRule {
+	return &ProxyRouteRule{
 		method: method,
 		path:   path,
 	}
 }
 
-func (rr *RouteRule) Method() string {
+func (rr *ProxyRouteRule) Method() string {
 	return rr.method
 }
 
-func (rr *RouteRule) Path() string {
+func (rr *ProxyRouteRule) Path() string {
 	return rr.path
 }
 
-func (rr *RouteRule) Regexp() regexp.Regexp {
+func (rr *ProxyRouteRule) Regexp() regexp.Regexp {
 	return *rr.regexp
 }

@@ -1,4 +1,4 @@
-package http
+package routing
 
 import (
 	"fmt"
@@ -33,7 +33,12 @@ func NewRouter(routeRules []*RouteRule) (*router, error) {
 		if !r.DynamicPath {
 			router.staticPaths[r.Path] = r
 		} else {
-			compiled, err := regexp.Compile(r.Path)
+			regexConv, err := RouteToRegExp(r.Path)
+			if err != nil {
+				return nil, fmt.Errorf("invalid path definition: '%s'", r.Path)
+			}
+
+			compiled, err := regexp.Compile(regexConv)
 			if err != nil {
 				return nil, fmt.Errorf("unable parse dynamic path: '%s' error: %s", r.Path, err.Error())
 			}
@@ -47,11 +52,11 @@ func NewRouter(routeRules []*RouteRule) (*router, error) {
 
 // FindMatch can be used inside a http.Handle() to check if incoming request matches with any of the routing rules.
 // It returns routeTo func of the match.
-// It also extracts and returns route parameters from named regex groups.
+// It also extracts and returns route parameters from curly bracket definitions.
 //
-// E.g: Input path: `/Transfer/(?P<guid>\S+)`
+// E.g: Input path: `/Transfer/{guid}`
 //
-// Request: `/Transfer/abcdef` will register "guid"="abcdef" to routeParams.
+// Request: `/Transfer/abcdef` will register as "guid"="abcdef" to routeParams.
 func (rt *router) FindMatch(r *go_http.Request) (routeTo func(w go_http.ResponseWriter, r *go_http.Request, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
 	staticRoute := rt.staticPaths[queryStrippedPath]
@@ -104,13 +109,13 @@ func (rt *router) HasMatch(r *go_http.Request) bool {
 }
 
 // RouteRule is used for registering rules to Router.
-// Any request path with route parameters in it should be registered as named regex group.
-// Also they should be registered as DynamicPath=true.
+// Any request path with route parameters in it should be registered with within curly brackets.
+// They should also be registered as DynamicPath=true.
 //
-// Example path:  `/Transfer/(?P<guid>\S+)`
+// Example path:  `/Transfer/{guid}`
 //
 // Query parameters in a url are ignored during checking.
-// Therefore, request paths that have only query parameters in it should be registered as DynamicPath=false.
+// Therefore, request paths that have query parameters in it (but have no route parameters) should be registered as DynamicPath=false.
 type RouteRule struct {
 	Method string
 	Path   string
