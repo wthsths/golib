@@ -9,12 +9,12 @@ type RouteTable struct {
 	routeRules []*ProxyRouteRule
 }
 
-// NewRouteTable checks validity of input routeRules.
+// NewProxyRouteTable checks validity of input routeRules.
 //
 // Note that rules for paths with route parameters must be defined with curly brackets.
 //
 // E.g: /Transfer/{guid}
-func NewRouteTable(routeRules []*ProxyRouteRule) (*RouteTable, error) {
+func NewProxyRouteTable(routeRules []*ProxyRouteRule) (*RouteTable, error) {
 	table := &RouteTable{
 		routeRules: routeRules,
 	}
