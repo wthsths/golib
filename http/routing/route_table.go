@@ -39,12 +39,12 @@ type ProxyRouteRule struct {
 	regexp *regexp.Regexp
 }
 
-// NewRouteRule creates a single entry for RouteTable.
+// NewProxyRouteRule creates a single entry for RouteTable.
 //
 // Note that rules for paths with route parameters must be defined with curly brackets.
 //
 // E.g: /Transfer/{guid}
-func NewRouteRule(method, path string) *ProxyRouteRule {
+func NewProxyRouteRule(method, path string) *ProxyRouteRule {
 	return &ProxyRouteRule{
 		method: method,
 		path:   path,
