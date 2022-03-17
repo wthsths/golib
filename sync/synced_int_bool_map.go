@@ -2,35 +2,29 @@ package sync
 
 import go_sync "sync"
 
+// SyncedInt64BoolMap is goroutine -afe variant of map[int64]bool type.
 type SyncedInt64BoolMap struct {
 	mutex    go_sync.Mutex
 	innerMap map[int64]bool
 }
 
+// NewSyncedInt64BoolMap creates a new goroutine-safe value of map[int64]bool type.
 func NewSyncedInt64BoolMap(initialCap int) *SyncedInt64BoolMap {
 	return &SyncedInt64BoolMap{
 		innerMap: make(map[int64]bool, initialCap),
 	}
 }
 
-func (m *SyncedInt64BoolMap) Set(key int64, value bool) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	m.innerMap[key] = value
-}
-
+// Get returns wrapped map[int64]bool value in a goroutine-safe manner.
 func (m *SyncedInt64BoolMap) Get(key int64) bool {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-
 	return m.innerMap[key]
 }
 
 func (m *SyncedInt64BoolMap) GetWithCheck(key int64) (bool, bool) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-
 	value, ok := m.innerMap[key]
 	return value, ok
 }
@@ -45,4 +39,11 @@ func (m *SyncedInt64BoolMap) GetKeys() []int64 {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Set updates the wrapped map[int64]bool value in a goroutine-safe manner.
+func (m *SyncedInt64BoolMap) Set(key int64, value bool) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	m.innerMap[key] = value
 }
