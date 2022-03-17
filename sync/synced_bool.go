@@ -2,7 +2,7 @@ package sync
 
 import "sync"
 
-// SyncedBool is goroutine -afe variant of boolean type.
+// SyncedBool is goroutine-safe variant of boolean type.
 type SyncedBool struct {
 	value bool
 	mutex *sync.Mutex
