@@ -1,8 +1,8 @@
-package routing
+package gl_routing
 
 import (
 	"fmt"
-	go_http "net/http"
+	"net/http"
 	"regexp"
 	"strings"
 )
@@ -57,7 +57,7 @@ func NewRouter(routeRules []*RouteRule) (*router, error) {
 // E.g: Input path: `/Transfer/{guid}`
 //
 // Request: `/Transfer/abcdef` will register as "guid"="abcdef" to routeParams.
-func (rt *router) FindMatch(r *go_http.Request) (routeTo func(w go_http.ResponseWriter, r *go_http.Request, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
+func (rt *router) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter, r *http.Request, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
 	staticRoute := rt.staticPaths[queryStrippedPath]
 	if staticRoute != nil && staticRoute.Method == r.Method {
@@ -83,7 +83,7 @@ func (rt *router) FindMatch(r *go_http.Request) (routeTo func(w go_http.Response
 }
 
 // HasMatch returns true if input request matches with any of the registered routed rules.
-func (rt *router) HasMatch(r *go_http.Request) bool {
+func (rt *router) HasMatch(r *http.Request) bool {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
 	staticRoute := rt.staticPaths[queryStrippedPath]
 	if staticRoute != nil && staticRoute.Method == r.Method {
@@ -123,6 +123,6 @@ type RouteRule struct {
 	// Query parameters however are NOT considered as a part of dynamic path.
 	DynamicPath  bool
 	RequiresAuth bool
-	RouteTo      func(w go_http.ResponseWriter, r *go_http.Request, routeParams map[string]string)
+	RouteTo      func(w http.ResponseWriter, r *http.Request, routeParams map[string]string)
 	regex        *regexp.Regexp
 }

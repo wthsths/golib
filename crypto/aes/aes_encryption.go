@@ -1,4 +1,4 @@
-package aes
+package gl_aes
 
 import (
 	"crypto/aes"

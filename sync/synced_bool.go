@@ -1,4 +1,4 @@
-package sync
+package gl_sync
 
 import "sync"
 

@@ -1,10 +1,10 @@
-package sync
+package gl_sync
 
-import go_sync "sync"
+import "sync"
 
 // SyncedInt64BoolMap is goroutine-safe variant of map[int64]bool type.
 type SyncedInt64BoolMap struct {
-	mutex    go_sync.Mutex
+	mutex    sync.Mutex
 	innerMap map[int64]bool
 }
 

@@ -1,4 +1,4 @@
-package crypto
+package gl_crypto
 
 import (
 	crand "crypto/rand"

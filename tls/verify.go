@@ -1,4 +1,4 @@
-package tls
+package gl_tls
 
 import (
 	"crypto/tls"

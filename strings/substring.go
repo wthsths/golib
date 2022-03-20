@@ -1,4 +1,4 @@
-package strings
+package gl_strings
 
 func MaskRange(s string, maskStart, maskEnd int, maskChar rune) string {
 	rs := []rune(s)

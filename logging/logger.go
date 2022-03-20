@@ -1,4 +1,4 @@
-package logging
+package gl_logging
 
 import (
 	"fmt"

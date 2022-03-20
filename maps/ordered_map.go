@@ -1,4 +1,4 @@
-package maps
+package gl_maps
 
 // OrderedStrMap wraps a map and a slice to keep track of insertion order of the map entries.
 //

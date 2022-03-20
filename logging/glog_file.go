@@ -16,7 +16,7 @@
 
 // File I/O for logs.
 
-package logging
+package gl_logging
 
 import (
 	"errors"

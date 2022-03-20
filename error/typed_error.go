@@ -1,4 +1,4 @@
-package constants
+package gl_error
 
 type TypedErrorCode int32
 

@@ -1,7 +1,7 @@
-package sync
+package gl_sync
 
 import (
-	go_sync "sync"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,10 +47,10 @@ func TestAcquireRelease(t *testing.T) {
 			})
 
 			// Acquire and release same key multiple times
-			wg := go_sync.WaitGroup{}
+			wg := sync.WaitGroup{}
 			for i := 0; i < test.count; i++ {
 				wg.Add(1)
-				go func(index int, key string, wgIn *go_sync.WaitGroup, waiterIn *KeyWaiter) {
+				go func(index int, key string, wgIn *sync.WaitGroup, waiterIn *KeyWaiter) {
 					defer wgIn.Done()
 					// Acquire a key
 					// t.Logf("acquiring %dth  %s", index, key)

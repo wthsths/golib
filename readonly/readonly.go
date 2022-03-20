@@ -1,4 +1,4 @@
-package readonly
+package gl_readonly
 
 type String struct {
 	value string

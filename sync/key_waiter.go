@@ -1,12 +1,10 @@
-package sync
+package gl_sync
 
-import (
-	go_sync "sync"
-)
+import "sync"
 
 // KeyWaiter is used for blocking simultaneous usage of keys referring to same entities.
 type KeyWaiter struct {
-	mu       go_sync.RWMutex
+	mu       sync.RWMutex
 	waitKeys map[string]*waitKey
 }
 
@@ -18,7 +16,7 @@ func NewKeyWaiter() *KeyWaiter {
 
 // waitKey wraps a single mutex with the waiting count to be used for each unique key.
 type waitKey struct {
-	go_sync.Mutex
+	sync.Mutex
 	waiting int
 }
 

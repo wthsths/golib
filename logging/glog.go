@@ -1,3 +1,5 @@
+package gl_logging
+
 // Go support for leveled logs, analogous to https://code.google.com/p/google-glog/
 //
 // Copyright 2013 Google Inc. All Rights Reserved.
@@ -68,7 +70,6 @@
 //			-vmodule=gopher*=3
 //		sets the V level to 3 in all Go files whose names begin "gopher".
 //
-package logging
 
 import (
 	"bufio"

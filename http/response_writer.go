@@ -1,14 +1,14 @@
-package http
+package gl_http
 
 import (
 	"encoding/json"
-	go_http "net/http"
+	"net/http"
 
-	gl_json "github.com/payports/golib/json"
+	gl_constants "github.com/payports/golib/constants"
 )
 
 // WriteCustomJsonResponse serializes input res and creates response payload from it.
-func WriteCustomJsonResponse(w go_http.ResponseWriter, statusCode int, res interface{}) (writtenRes []byte, err error) {
+func WriteCustomJsonResponse(w http.ResponseWriter, statusCode int, res interface{}) (writtenRes []byte, err error) {
 	resJson, err := json.Marshal(res)
 	if err != nil {
 		return nil, err
@@ -22,6 +22,6 @@ func WriteCustomJsonResponse(w go_http.ResponseWriter, statusCode int, res inter
 		return nil, err
 	}
 
-	resPrettyJson, _ := json.MarshalIndent(res, "", gl_json.IndentDefault)
+	resPrettyJson, _ := json.MarshalIndent(res, "", gl_constants.JsonIndentDefault)
 	return resPrettyJson, nil
 }

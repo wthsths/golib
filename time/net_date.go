@@ -1,4 +1,4 @@
-package time
+package gl_time
 
 import (
 	"fmt"

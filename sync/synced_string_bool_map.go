@@ -1,10 +1,10 @@
-package sync
+package gl_sync
 
-import go_sync "sync"
+import "sync"
 
 // SyncedStringBoolMap is goroutine-safe variant of map[string]bool type.
 type SyncedStringBoolMap struct {
-	mutex    go_sync.Mutex
+	mutex    sync.Mutex
 	innerMap map[string]bool
 }
 
