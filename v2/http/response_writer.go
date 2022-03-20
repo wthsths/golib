@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	gl_constants "github.com/payports/golib/constants"
+	gl_constants "github.com/payports/golib/v2/constants"
 )
 
 // WriteCustomJsonResponse serializes input res and creates response payload from it.

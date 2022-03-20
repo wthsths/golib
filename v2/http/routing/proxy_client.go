@@ -9,7 +9,7 @@ import (
 	"net/url"
 
 	"github.com/google/uuid"
-	gl_http "github.com/payports/golib/http"
+	gl_http "github.com/payports/golib/v2/http"
 )
 
 type proxyClient struct {
