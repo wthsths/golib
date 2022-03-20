@@ -1,6 +1,6 @@
-module github.com/payports/golib
+module github.com/payports/golib/v2
 
-go 1.15
+go 1.16
 
 require (
 	github.com/google/uuid v1.3.0
