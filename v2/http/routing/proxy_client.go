@@ -8,17 +8,19 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/google/uuid"
 	gl_http "github.com/payports/golib/v2/http"
+	"github.com/teris-io/shortid"
 )
 
 type proxyClient struct {
-	routeTable *RouteTable
-	routeUrl   string
-	httpCli    *http.Client
-	onErr      func(error, string)
-	onReqRead  func([]byte, string)
-	onResRead  func([]byte, string)
+	routeTable       *RouteTable
+	routeUrl         string
+	httpCli          *http.Client
+	shortIDGenerator *shortid.Shortid
+
+	onErr     func(error, string)
+	onReqRead func([]byte, string)
+	onResRead func([]byte, string)
 }
 
 // NewProxyClient creates a new proxy client instance.
@@ -39,23 +41,49 @@ type proxyClient struct {
 // RouteTable entries with route parameters can be defined in following fashion:
 //
 // E.g.: /Transfer/{guid}
-func NewProxyClient(routeTable *RouteTable, routeUrl string, httpCli *http.Client, onErr func(error, string), onReqRead func([]byte, string), onResRead func([]byte, string)) *proxyClient {
-	return &proxyClient{
-		routeTable: routeTable,
-		routeUrl:   routeUrl,
-		httpCli:    httpCli,
-		onErr:      onErr,
-		onReqRead:  onReqRead,
-		onResRead:  onResRead,
+func NewProxyClient(routeTable *RouteTable, routeUrl string, httpCli *http.Client, onErr func(error, string), onReqRead func([]byte, string), onResRead func([]byte, string)) (*proxyClient, error) {
+	shortIDGenerator, err := shortid.New(1, shortid.DefaultABC, 2342)
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize short ID generator: %s", err.Error())
 	}
+	return &proxyClient{
+		routeTable:       routeTable,
+		routeUrl:         routeUrl,
+		httpCli:          httpCli,
+		shortIDGenerator: shortIDGenerator,
+		onErr:            onErr,
+		onReqRead:        onReqRead,
+		onResRead:        onResRead,
+	}, nil
 }
 
 // HandleRequestAndRedirect can be registered to http.Handle() for redirecting requests to desired url.
 func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
-	sessionID := uuid.NewString()
+	sessionID, err := pc.shortIDGenerator.Generate()
+	if err != nil {
+		if pc.onErr != nil {
+			pc.onErr(err, sessionID)
+		}
+		writtenRes, err := gl_http.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
+			"message": "internal server error",
+		})
+		if err != nil {
+			if pc.onErr != nil {
+				pc.onErr(err, sessionID)
+			}
+			return
+		}
+		if pc.onResRead != nil {
+			pc.onReqRead(writtenRes, sessionID)
+		}
+		if pc.onResRead != nil {
+			pc.onResRead(writtenRes, sessionID)
+		}
+		return
+	}
+
 	uri := r.URL.RequestURI()
 
-	var err error
 	isAllowed := false
 
 	for _, e := range pc.routeTable.routeRules {
