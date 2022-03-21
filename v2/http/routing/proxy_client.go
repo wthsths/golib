@@ -76,9 +76,6 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		if pc.onResRead != nil {
 			pc.onReqRead(writtenRes, sessionID)
 		}
-		if pc.onResRead != nil {
-			pc.onResRead(writtenRes, sessionID)
-		}
 		return
 	}
 
@@ -175,7 +172,6 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	defer r.Body.Close()
 
 	if pc.onReqRead != nil {
 		pc.onReqRead(reqBytes, sessionID)
@@ -191,7 +187,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		Body:   nopCloser,
 	}
 
-	res, err := pc.httpCli.Do(httpReq)
+	httpRes, err := pc.httpCli.Do(httpReq)
 	if err != nil {
 		if pc.onErr != nil {
 			pc.onErr(fmt.Errorf("error executing http request: %s", err.Error()), sessionID)
@@ -211,7 +207,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	resBytes, err := ioutil.ReadAll(res.Body)
+	resBytes, err := ioutil.ReadAll(httpRes.Body)
 	if err != nil {
 		if pc.onErr != nil {
 			pc.onErr(fmt.Errorf("error reading response payload: %s", err.Error()), sessionID)
@@ -230,12 +226,16 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	defer res.Body.Close()
+	defer httpRes.Body.Close()
 
-	for k, v := range res.Header {
+	for k, v := range httpRes.Header {
 		for i := 0; i < len(v); i++ {
 			w.Header().Add(k, v[i])
 		}
+	}
+
+	if httpRes.StatusCode != http.StatusOK {
+		w.WriteHeader(httpRes.StatusCode)
 	}
 
 	_, err = w.Write(resBytes)
@@ -258,12 +258,7 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	/* Set status code last, or other header values and body will be lost. */
-	if res.StatusCode != http.StatusOK {
-		w.WriteHeader(res.StatusCode)
-	}
-
-	if res.Header.Get("Content-Encoding") == "gzip" {
+	if httpRes.Header.Get("Content-Encoding") == "gzip" {
 		reader := bytes.NewReader(resBytes)
 		gzipReader, err := gzip.NewReader(reader)
 		if err != nil {
