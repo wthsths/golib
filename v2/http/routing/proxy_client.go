@@ -182,7 +182,6 @@ func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	defer res.Body.Close()
 
 	resBytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
