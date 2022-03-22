@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/teris-io/shortid"
 )
 
@@ -18,7 +19,7 @@ const (
 )
 
 var isInitialized = false
-var shortIDGenerator *shortid.Shortid
+var loggerShortIDGenerator *shortid.Shortid
 
 /* "glog" implementation is built upon: "https://github.com/birlesikodeme/glog" */
 
@@ -49,7 +50,7 @@ func Init(name, dir string) error {
 		return err
 	}
 
-	shortIDGenerator, err = shortid.New(1, shortid.DefaultABC, 2342)
+	loggerShortIDGenerator, err = shortid.New(1, shortid.DefaultABC, 2342)
 	if err != nil {
 		return fmt.Errorf("unable to initialize short ID generator: %s", err.Error())
 	}
@@ -79,7 +80,11 @@ func NewSessionLogger() *sessionLogger {
 		panic("Logger is not initialized yet. logging.Init() must be executed first.")
 	}
 
-	generatedID, _ := shortIDGenerator.Generate()
+	generatedID, err := loggerShortIDGenerator.Generate()
+	if err != nil {
+		generatedID = uuid.NewString()
+	}
+
 	return &sessionLogger{
 		sessionID: generatedID,
 	}

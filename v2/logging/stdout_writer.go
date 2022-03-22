@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"runtime"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/teris-io/shortid"
 )
+
+var stdoutWriterShortIDGenerator *shortid.Shortid
 
 type stdoutWriter struct {
 	sessionID    string
@@ -12,17 +17,29 @@ type stdoutWriter struct {
 	disablePrint bool
 }
 
+func generateStdoutWriterSessionID() string {
+	var err error
+	if stdoutWriterShortIDGenerator == nil {
+		stdoutWriterShortIDGenerator, err = shortid.New(1, shortid.DefaultABC, 2342)
+		if err != nil {
+			return uuid.NewString()
+		}
+	}
+	generatedID, err := stdoutWriterShortIDGenerator.Generate()
+	if err != nil {
+		return uuid.NewString()
+	}
+	return generatedID
+}
+
 // NewStdoutWriter creates a stdoutWriter instance which implements Logger interface.
 //
 // Logging functions can be used to write data to stdout.
 //
-// stdoutWriter does not require initialization.
-//
 // NOTE DisablePrint() can be called to prevent outputs. (Can be desirable when writing tests etc...).
 func NewStdoutWriter() *stdoutWriter {
-	generatedID, _ := shortIDGenerator.Generate()
 	return &stdoutWriter{
-		sessionID:    generatedID,
+		sessionID:    generateStdoutWriterSessionID(),
 		disablePrint: false,
 	}
 }
