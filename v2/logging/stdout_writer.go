@@ -70,24 +70,40 @@ func (l *stdoutWriter) EnablePrint() {
 }
 
 func (l *stdoutWriter) Infof(format string, args ...interface{}) {
+	if l.disablePrint {
+		return
+	}
+
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeInfo, formatted)
 	fmt.Println(log)
 }
 
 func (l *stdoutWriter) Warnf(format string, args ...interface{}) {
+	if l.disablePrint {
+		return
+	}
+
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeWarn, formatted)
 	fmt.Println(log)
 }
 
 func (l *stdoutWriter) Errorf(format string, args ...interface{}) {
+	if l.disablePrint {
+		return
+	}
+
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeError, formatted)
 	fmt.Println(log)
 }
 
 func (l *stdoutWriter) Fatalf(format string, args ...interface{}) {
+	if l.disablePrint {
+		return
+	}
+
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeFatal, formatted)
 	fmt.Println(log)
