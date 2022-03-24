@@ -8,7 +8,14 @@ import (
 	go_time "time"
 )
 
-func VerifyHostCertificate(host string, port int) error {
+type tlsVerifier struct {
+}
+
+func NewTLSVerifier() *tlsVerifier {
+	return &tlsVerifier{}
+}
+
+func (tv *tlsVerifier) VerifyHostCertificate(host string, port int) error {
 	conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%d", host, port), nil)
 	if err != nil {
 		return fmt.Errorf("server does not support tls certificate: %s", err.Error())
@@ -27,7 +34,7 @@ func VerifyHostCertificate(host string, port int) error {
 	return nil
 }
 
-func VerifySelfSignedCertificate(hostAddr string, certPem []byte) error {
+func (tv *tlsVerifier) VerifySelfSignedCertificate(hostAddr string, certPem []byte) error {
 	rootCAs, _ := x509.SystemCertPool()
 	if rootCAs == nil {
 		rootCAs = x509.NewCertPool()
