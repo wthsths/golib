@@ -2,14 +2,14 @@ package gl_http
 
 import "net/url"
 
-type queryExtractor struct{}
+type QueryExtractor struct{}
 
-func NewQueryExtractor() *queryExtractor {
-	return &queryExtractor{}
+func NewQueryExtractor() *QueryExtractor {
+	return &QueryExtractor{}
 }
 
 // ReadAll returns top level query parameter pairs from input url.
-func (e *queryExtractor) ReadAll(url *url.URL) map[string]interface{} {
+func (e *QueryExtractor) ReadAll(url *url.URL) map[string]interface{} {
 	returnMap := make(map[string]interface{}, len(url.Query()))
 	queryParams := url.Query()
 

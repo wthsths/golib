@@ -15,7 +15,7 @@ type responseWriter interface {
 	WriteCustomJsonResponse(w http.ResponseWriter, statusCode int, res interface{}) (writtenRes []byte, err error)
 }
 
-type proxyClient struct {
+type ProxyClient struct {
 	routeTable       *RouteTable
 	routeUrl         string
 	httpCli          *http.Client
@@ -45,12 +45,12 @@ type proxyClient struct {
 // RouteTable entries with route parameters can be defined in following fashion:
 //
 // E.g.: /Transfer/{guid}
-func NewProxyClient(routeTable *RouteTable, routeUrl string, httpCli *http.Client, responseWriter responseWriter, onErr func(error, string), onReqRead func([]byte, string), onResRead func([]byte, string)) (*proxyClient, error) {
+func NewProxyClient(routeTable *RouteTable, routeUrl string, httpCli *http.Client, responseWriter responseWriter, onErr func(error, string), onReqRead func([]byte, string), onResRead func([]byte, string)) (*ProxyClient, error) {
 	shortIDGenerator, err := shortid.New(1, shortid.DefaultABC, 2342)
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize short ID generator: %s", err.Error())
 	}
-	return &proxyClient{
+	return &ProxyClient{
 		routeTable:       routeTable,
 		routeUrl:         routeUrl,
 		httpCli:          httpCli,
@@ -64,7 +64,7 @@ func NewProxyClient(routeTable *RouteTable, routeUrl string, httpCli *http.Clien
 }
 
 // HandleRequestAndRedirect can be registered to http.Handle() for redirecting requests to desired url.
-func (pc *proxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
+func (pc *ProxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
 	sessionID, err := pc.shortIDGenerator.Generate()
 	if err != nil {
 		if pc.onErr != nil {

@@ -7,16 +7,16 @@ import (
 	gl_constants "github.com/payports/golib/v2/constants"
 )
 
-type responseWriter struct {
+type ResponseWriter struct {
 }
 
 // NewResponseWriter creates an utility instance for handling of http responses.
-func NewResponseWriter() *responseWriter {
-	return &responseWriter{}
+func NewResponseWriter() *ResponseWriter {
+	return &ResponseWriter{}
 }
 
 // WriteCustomJsonResponse serializes input res and creates response payload from it.
-func (hu *responseWriter) WriteCustomJsonResponse(w http.ResponseWriter, statusCode int, res interface{}) (writtenRes []byte, err error) {
+func (hu *ResponseWriter) WriteCustomJsonResponse(w http.ResponseWriter, statusCode int, res interface{}) (writtenRes []byte, err error) {
 	resJson, err := json.Marshal(res)
 	if err != nil {
 		return nil, err

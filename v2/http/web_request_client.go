@@ -10,15 +10,15 @@ import (
 	"net/url"
 )
 
-type webRequestClient struct {
+type WebRequestClient struct {
 	client        *http.Client
 	marshalFunc   func(v interface{}) ([]byte, error)
 	unmarshalFunc func(data []byte, v interface{}) error
 }
 
 // NewWebRequestClient creates a wrapper utility which handles http communication.
-func NewWebRequestClient(client *http.Client, marshalFunc func(v interface{}) ([]byte, error), unmarshalFunc func(data []byte, v interface{}) error) *webRequestClient {
-	return &webRequestClient{
+func NewWebRequestClient(client *http.Client, marshalFunc func(v interface{}) ([]byte, error), unmarshalFunc func(data []byte, v interface{}) error) *WebRequestClient {
+	return &WebRequestClient{
 		client:        client,
 		marshalFunc:   marshalFunc,
 		unmarshalFunc: unmarshalFunc,
@@ -26,7 +26,7 @@ func NewWebRequestClient(client *http.Client, marshalFunc func(v interface{}) ([
 }
 
 // Get sends a GET http request.
-func (w *webRequestClient) Get(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
+func (w *WebRequestClient) Get(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
 	if queryParams != nil {
 		params := url.Values{}
 		for k, v := range queryParams {
@@ -70,7 +70,7 @@ func (w *webRequestClient) Get(ctx context.Context, uri string, headers map[stri
 // Post sends a POST http request using a struct as payload.
 //
 // Use PostSerializedBody method if your payload input is string.
-func (w *webRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
+func (w *WebRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
 	reqAsBytes, err := w.marshalFunc(request)
 	if err != nil {
 		errStr := fmt.Errorf("could not convert request to byte array: %s", err.Error())
@@ -118,7 +118,7 @@ func (w *webRequestClient) Post(ctx context.Context, uri string, headers map[str
 }
 
 // PostSerializedBody sends a POST http request with a string payload.
-func (w *webRequestClient) PostSerializedBody(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request string, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
+func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request string, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
 	if queryParams != nil {
 		params := url.Values{}
 		for k, v := range queryParams {
@@ -159,7 +159,7 @@ func (w *webRequestClient) PostSerializedBody(ctx context.Context, uri string, h
 	return httpRes.Header, responseParser, httpRes.StatusCode, nil
 }
 
-func (w *webRequestClient) CreateBasicAuthHeaderValue(username, password string) string {
+func (w *WebRequestClient) CreateBasicAuthHeaderValue(username, password string) string {
 	auth := username + ":" + password
 	encoded := base64.StdEncoding.EncodeToString([]byte(auth))
 	return "Basic " + encoded

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type router struct {
+type Router struct {
 	staticPaths  map[string]*RouteRule
 	dynamicPaths []*RouteRule
 	allPaths     map[string]bool
@@ -16,8 +16,8 @@ type router struct {
 // NewRouter creates http router from input routeRules.
 //
 // It will return error upon invalid data.
-func NewRouter(routeRules []*RouteRule) (*router, error) {
-	router := &router{
+func NewRouter(routeRules []*RouteRule) (*Router, error) {
+	router := &Router{
 		staticPaths:  make(map[string]*RouteRule, len(routeRules)),
 		dynamicPaths: make([]*RouteRule, 0, len(routeRules)),
 		allPaths:     make(map[string]bool, len(routeRules)),
@@ -57,7 +57,7 @@ func NewRouter(routeRules []*RouteRule) (*router, error) {
 // E.g: Input path: `/Transfer/{guid}`
 //
 // Request: `/Transfer/abcdef` will register as "guid"="abcdef" to routeParams.
-func (rt *router) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter, r *http.Request, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
+func (rt *Router) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter, r *http.Request, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
 	staticRoute := rt.staticPaths[queryStrippedPath]
 	if staticRoute != nil && staticRoute.Method == r.Method {
@@ -83,7 +83,7 @@ func (rt *router) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter
 }
 
 // HasMatch returns true if input request matches with any of the registered routed rules.
-func (rt *router) HasMatch(r *http.Request) bool {
+func (rt *Router) HasMatch(r *http.Request) bool {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
 	staticRoute := rt.staticPaths[queryStrippedPath]
 	if staticRoute != nil && staticRoute.Method == r.Method {
