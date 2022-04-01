@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"runtime"
 	"time"
-
-	"github.com/google/uuid"
-	"github.com/teris-io/shortid"
 )
 
 const (
@@ -19,7 +16,7 @@ const (
 )
 
 var isInitialized = false
-var loggerShortIDGenerator *shortid.Shortid
+var writeToFileSystem = true
 
 /* "glog" implementation is built upon: "https://github.com/birlesikodeme/glog" */
 
@@ -31,7 +28,7 @@ type Logger interface {
 	//
 	// If SetTitle("title") was called prior to logging, output will be as follows:
 	//
-	// [2022-02-27 17:58:03.565][KFTGcuiQ9p][title][FATAL]: fatal error!
+	// [2022-02-27 17:58:03.565][your-id][title][log-level]: fatal error!
 	SetTitle(input string)
 
 	Infof(format string, args ...interface{})
@@ -50,88 +47,108 @@ func Init(name, dir string) error {
 		return err
 	}
 
-	loggerShortIDGenerator, err = shortid.New(1, shortid.DefaultABC, 2342)
-	if err != nil {
-		return fmt.Errorf("unable to initialize short ID generator: %s", err.Error())
-	}
-
 	isInitialized = true
 	return nil
 }
 
-type sessionLogger struct {
+// SetFileSystemWrite can be used to enable or disable file system writes.
+//
+// Outputs to stdout will always occur.
+func SetFileSystemWrite(active bool) {
+	writeToFileSystem = active
+}
+
+type logger struct {
 	sessionID string
 	title     string
 }
 
-// NewSessionLogger creates new logger instance with a internally generated unique ID.
+// NewLogger creates new logger instance with a internally generated unique ID.
 //
 // Created instance can be passed accross application layers for structed session logging.
 //
 // Example log output when Fatalf("fatal error!") is called:
 //
-// [2022-02-27 17:58:03.565][KFTGcuiQ9p][][FATAL]: fatal error!
-//
-// If SetTitle("title") was called prior to logging, output will be as follows:
-//
-// [2022-02-27 17:58:03.565][KFTGcuiQ9p][title][FATAL]: fatal error!
-func NewSessionLogger() *sessionLogger {
-	if !isInitialized {
-		panic("Logger is not initialized yet. logging.Init() must be executed first.")
-	}
-
-	generatedID, err := loggerShortIDGenerator.Generate()
-	if err != nil {
-		generatedID = uuid.NewString()
-	}
-
-	return &sessionLogger{
-		sessionID: generatedID,
+// [2022-02-27 17:58:03.565][your-id][your-title][FATAL]: fatal error!
+func NewLogger(title, sessionID string) *logger {
+	return &logger{
+		title:     title,
+		sessionID: sessionID,
 	}
 }
 
-// NewSessionLoggerWithCustomID creates a logger instance with given input ID value.
-//
-// Input value will override the internally generated session ID value.
-func NewSessionLoggerWithCustomID(id string) *sessionLogger {
-	if !isInitialized {
-		panic("Logger is not initialized yet. logging.Init() must be executed first.")
-	}
-
-	return &sessionLogger{
+// NewLoggerWithID creates a logger instance with given input ID value.
+func NewLoggerWithID(id string) *logger {
+	return &logger{
 		sessionID: id,
 	}
 }
 
-func (l *sessionLogger) SetTitle(input string) {
+func (l *logger) SetTitle(input string) {
 	l.title = input
 }
 
-func (l *sessionLogger) Infof(format string, args ...interface{}) {
+func (l *logger) Infof(format string, args ...interface{}) {
+	if !writeToFileSystem && !isInitialized {
+		panic("Logger is not initialized yet. logging.Init() must be executed first to write logs to file system.")
+	}
+
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeInfo, formatted)
-	infoln(log)
+
+	if writeToFileSystem {
+		infoln(log)
+	} else {
+		fmt.Println(log)
+	}
 }
 
-func (l *sessionLogger) Warnf(format string, args ...interface{}) {
+func (l *logger) Warnf(format string, args ...interface{}) {
+	if !writeToFileSystem && !isInitialized {
+		panic("Logger is not initialized yet. logging.Init() must be executed first to write logs to file system.")
+	}
+
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeWarn, formatted)
-	warningln(log)
+
+	if writeToFileSystem {
+		warningln(log)
+	} else {
+		fmt.Println(log)
+	}
 }
 
-func (l *sessionLogger) Errorf(format string, args ...interface{}) {
+func (l *logger) Errorf(format string, args ...interface{}) {
+	if !writeToFileSystem && !isInitialized {
+		panic("Logger is not initialized yet. logging.Init() must be executed first to write logs to file system.")
+	}
+
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeError, formatted)
-	errorln(log)
+
+	if writeToFileSystem {
+		errorln(log)
+	} else {
+		fmt.Println(log)
+	}
 }
 
-func (l *sessionLogger) Fatalf(format string, args ...interface{}) {
+func (l *logger) Fatalf(format string, args ...interface{}) {
+	if !writeToFileSystem && !isInitialized {
+		panic("Logger is not initialized yet. logging.Init() must be executed first to write logs to file system.")
+	}
+
 	formatted := fmt.Sprintf(format, args...)
 	log := l.getStructuredLog(logTypeFatal, formatted)
-	fatalln(log)
+
+	if writeToFileSystem {
+		fatalln(log)
+	} else {
+		fmt.Println(log)
+	}
 }
 
-func (l *sessionLogger) getStructuredLog(logType, content string) string {
+func (l *logger) getStructuredLog(logType, content string) string {
 	pc, filename, line, _ := runtime.Caller(2)
 
 	var logSuffix string
