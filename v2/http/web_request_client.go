@@ -26,7 +26,7 @@ func NewWebRequestClient(client *http.Client, marshalFunc func(v interface{}) ([
 }
 
 // Get sends a GET http request.
-func (w *WebRequestClient) Get(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
+func (w *WebRequestClient) Get(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
 	if queryParams != nil {
 		params := url.Values{}
 		for k, v := range queryParams {
@@ -64,13 +64,13 @@ func (w *WebRequestClient) Get(ctx context.Context, uri string, headers map[stri
 		errStr := fmt.Errorf("could not unmarshal response into input interface: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
-	return httpRes.Header, responseParser, httpRes.StatusCode, nil
+	return httpRes.Header, bodyBytes, httpRes.StatusCode, nil
 }
 
 // Post sends a POST http request using a struct as payload.
 //
 // Use PostSerializedBody method if your payload input is string.
-func (w *WebRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
+func (w *WebRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
 	reqAsBytes, err := w.marshalFunc(request)
 	if err != nil {
 		errStr := fmt.Errorf("could not convert request to byte array: %s", err.Error())
@@ -114,11 +114,11 @@ func (w *WebRequestClient) Post(ctx context.Context, uri string, headers map[str
 		errStr := fmt.Errorf("could not unmarshal response into input interface: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
-	return httpRes.Header, responseParser, httpRes.StatusCode, nil
+	return httpRes.Header, bodyBytes, httpRes.StatusCode, nil
 }
 
 // PostSerializedBody sends a POST http request with a string payload.
-func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request string, responseParser interface{}) (resHeaders http.Header, resBody interface{}, statusCode int, err error) {
+func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request string, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
 	if queryParams != nil {
 		params := url.Values{}
 		for k, v := range queryParams {
@@ -156,7 +156,7 @@ func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, h
 		errStr := fmt.Errorf("could not unmarshal response into input interface: %s", err.Error())
 		return nil, nil, 0, errStr
 	}
-	return httpRes.Header, responseParser, httpRes.StatusCode, nil
+	return httpRes.Header, bodyBytes, httpRes.StatusCode, nil
 }
 
 func (w *WebRequestClient) CreateBasicAuthHeaderValue(username, password string) string {
