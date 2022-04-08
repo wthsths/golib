@@ -7,21 +7,19 @@ import (
 	"strings"
 )
 
-type SessionRouter struct {
-	sessionID    string
-	staticPaths  map[string]*SessionRouteRule
-	dynamicPaths []*SessionRouteRule
+type Router struct {
+	staticPaths  map[string]*RouteRule
+	dynamicPaths []*RouteRule
 	allPaths     map[string]bool
 }
 
-// NewSessionRouter creates http router from input routeRules.
+// NewRouter creates http router from input routeRules.
 //
 // It will return error upon invalid data.
-func NewSessionRouter(sessionID string, routeRules []*SessionRouteRule) (*SessionRouter, error) {
-	router := &SessionRouter{
-		sessionID:    sessionID,
-		staticPaths:  make(map[string]*SessionRouteRule, len(routeRules)),
-		dynamicPaths: make([]*SessionRouteRule, 0, len(routeRules)),
+func NewRouter(routeRules []*RouteRule) (*Router, error) {
+	router := &Router{
+		staticPaths:  make(map[string]*RouteRule, len(routeRules)),
+		dynamicPaths: make([]*RouteRule, 0, len(routeRules)),
 		allPaths:     make(map[string]bool, len(routeRules)),
 	}
 
@@ -59,7 +57,7 @@ func NewSessionRouter(sessionID string, routeRules []*SessionRouteRule) (*Sessio
 // E.g: Input path: `/Transfer/{guid}`
 //
 // Request: `/Transfer/abcdef` will register as "guid"="abcdef" to routeParams.
-func (sr *SessionRouter) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter, r *http.Request, sessionID string, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
+func (sr *Router) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter, r *http.Request, sessionID string, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
 	staticRoute := sr.staticPaths[queryStrippedPath]
 	if staticRoute != nil && staticRoute.Method == r.Method {
@@ -85,7 +83,7 @@ func (sr *SessionRouter) FindMatch(r *http.Request) (routeTo func(w http.Respons
 }
 
 // HasMatch returns true if input request matches with any of the registered routed rules.
-func (sr *SessionRouter) HasMatch(r *http.Request) bool {
+func (sr *Router) HasMatch(r *http.Request) bool {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
 	staticRoute := sr.staticPaths[queryStrippedPath]
 	if staticRoute != nil && staticRoute.Method == r.Method {
@@ -110,7 +108,7 @@ func (sr *SessionRouter) HasMatch(r *http.Request) bool {
 	return false
 }
 
-// SessionRouteRule is used for registering rules to Router.
+// RouteRule is used for registering rules to Router.
 // Any request path with route parameters in it should be registered with within curly brackets.
 // They should also be registered as DynamicPath=true.
 //
@@ -118,7 +116,7 @@ func (sr *SessionRouter) HasMatch(r *http.Request) bool {
 //
 // Query parameters in a url are ignored during checking.
 // Therefore, request paths that have query parameters in it (but have no route parameters) should be registered as DynamicPath=false.
-type SessionRouteRule struct {
+type RouteRule struct {
 	Method string
 	Path   string
 	// DynamicPath should be set to true if endpoint has route parameters in it.
