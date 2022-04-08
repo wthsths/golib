@@ -89,7 +89,7 @@ func (l *logger) SetTitle(input string) {
 }
 
 func (l *logger) Infof(format string, args ...interface{}) {
-	if !writeToFileSystem && !isInitialized {
+	if writeToFileSystem && !isInitialized {
 		panic("Logger is not initialized yet. logging.Init() must be executed first to write logs to file system.")
 	}
 
@@ -104,7 +104,7 @@ func (l *logger) Infof(format string, args ...interface{}) {
 }
 
 func (l *logger) Warnf(format string, args ...interface{}) {
-	if !writeToFileSystem && !isInitialized {
+	if writeToFileSystem && !isInitialized {
 		panic("Logger is not initialized yet. logging.Init() must be executed first to write logs to file system.")
 	}
 
@@ -119,7 +119,7 @@ func (l *logger) Warnf(format string, args ...interface{}) {
 }
 
 func (l *logger) Errorf(format string, args ...interface{}) {
-	if !writeToFileSystem && !isInitialized {
+	if writeToFileSystem && !isInitialized {
 		panic("Logger is not initialized yet. logging.Init() must be executed first to write logs to file system.")
 	}
 
@@ -134,7 +134,7 @@ func (l *logger) Errorf(format string, args ...interface{}) {
 }
 
 func (l *logger) Fatalf(format string, args ...interface{}) {
-	if !writeToFileSystem && !isInitialized {
+	if writeToFileSystem && !isInitialized {
 		panic("Logger is not initialized yet. logging.Init() must be executed first to write logs to file system.")
 	}
 
