@@ -7,6 +7,14 @@ import (
 	"strings"
 )
 
+type AuthType string
+
+const (
+	AuthJWT   AuthType = "JWT"
+	AuthBasic AuthType = "Basic"
+	AuthOther AuthType = "Other"
+)
+
 type Router struct {
 	staticPaths  map[string]*RouteRule
 	dynamicPaths []*RouteRule
@@ -57,11 +65,11 @@ func NewRouter(routeRules []*RouteRule) (*Router, error) {
 // E.g: Input path: `/Transfer/{guid}`
 //
 // Request: `/Transfer/abcdef` will register as "guid"="abcdef" to routeParams.
-func (sr *Router) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter, r *http.Request, sessionID string, routeParams map[string]string), requiresAuth bool, routeParams map[string]string) {
+func (sr *Router) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter, r *http.Request, sessionID string, routeParams map[string]string), requiresAuth bool, authType AuthType, routeParams map[string]string) {
 	queryStrippedPath := strings.Split(r.URL.RequestURI(), "?")[0]
 	staticRoute := sr.staticPaths[queryStrippedPath]
 	if staticRoute != nil && staticRoute.Method == r.Method {
-		return staticRoute.RouteTo, staticRoute.RequiresAuth, nil
+		return staticRoute.RouteTo, staticRoute.RequiresAuth, staticRoute.RouteAuthType, nil
 	}
 
 	for _, v := range sr.dynamicPaths {
@@ -75,11 +83,11 @@ func (sr *Router) FindMatch(r *http.Request) (routeTo func(w http.ResponseWriter
 				}
 			}
 
-			return v.RouteTo, v.RequiresAuth, result
+			return v.RouteTo, v.RequiresAuth, v.RouteAuthType, result
 		}
 	}
 
-	return nil, false, nil
+	return nil, false, "", nil
 }
 
 // HasMatch returns true if input request matches with any of the registered routed rules.
@@ -121,8 +129,9 @@ type RouteRule struct {
 	Path   string
 	// DynamicPath should be set to true if endpoint has route parameters in it.
 	// Query parameters however are NOT considered as a part of dynamic path.
-	DynamicPath  bool
-	RequiresAuth bool
-	RouteTo      func(w http.ResponseWriter, r *http.Request, sessionID string, routeParams map[string]string)
-	regex        *regexp.Regexp
+	DynamicPath   bool
+	RequiresAuth  bool
+	RouteAuthType AuthType
+	RouteTo       func(w http.ResponseWriter, r *http.Request, sessionID string, routeParams map[string]string)
+	regex         *regexp.Regexp
 }
