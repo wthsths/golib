@@ -121,10 +121,9 @@ type RouteRule struct {
 	Path   string
 	// DynamicPath should be set to true if endpoint has route parameters in it.
 	// Query parameters however are NOT considered as a part of dynamic path.
-	DynamicPath  bool
-	RequiresAuth bool
-	AuthWith     func(sessionID string, w http.ResponseWriter, r *http.Request) error
-	RouteTo      func(w http.ResponseWriter, r *http.Request, sessionID string, routeParams map[string]string)
+	DynamicPath bool
+	AuthWith    func(sessionID string, w http.ResponseWriter, r *http.Request) error
+	RouteTo     func(w http.ResponseWriter, r *http.Request, sessionID string, routeParams map[string]string)
 
 	regex *regexp.Regexp
 }
