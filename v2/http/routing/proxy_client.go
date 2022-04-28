@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/teris-io/shortid"
+	gl_session "github.com/payports/golib/v2/session"
 )
 
 type responseWriter interface {
@@ -16,11 +16,11 @@ type responseWriter interface {
 }
 
 type ProxyClient struct {
-	routeTable       *RouteTable
-	routeUrl         string
-	httpCli          *http.Client
-	shortIDGenerator *shortid.Shortid
-	responseWriter   responseWriter
+	routeTable     *RouteTable
+	routeUrl       string
+	httpCli        *http.Client
+	responseWriter responseWriter
+	ignoredPaths   map[string]bool
 
 	onErr     func(error, string)
 	onReqRead func([]byte, string)
@@ -30,6 +30,9 @@ type ProxyClient struct {
 // NewProxyClient creates a new proxy client instance.
 // Underlying HandleRequestAndRedirect method can be registered as a handler function.
 // Handler function will redirect incoming request to the routeUrl.
+//
+// ignoredPaths will return 200 without any other http content.
+// (ignoredPaths must be exact paths. Regex is not supported.)
 //
 // Since it will be registered to a blocking function (ListAndServe), internally occuring event data can be captured via following hooks:
 //
@@ -41,49 +44,33 @@ type ProxyClient struct {
 //
 // Hooks will contain a second string value which represents session ID.
 // Events which output the same session ID belong to same http session.
-//
-// RouteTable entries with route parameters can be defined in following fashion:
-//
-// E.g.: /Transfer/{guid}
-func NewProxyClient(routeTable *RouteTable, routeUrl string, httpCli *http.Client, responseWriter responseWriter, onErr func(error, string), onReqRead func([]byte, string), onResRead func([]byte, string)) (*ProxyClient, error) {
-	shortIDGenerator, err := shortid.New(1, shortid.DefaultABC, 2342)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize short ID generator: %s", err.Error())
-	}
-	return &ProxyClient{
-		routeTable:       routeTable,
-		routeUrl:         routeUrl,
-		httpCli:          httpCli,
-		shortIDGenerator: shortIDGenerator,
-		responseWriter:   responseWriter,
+func NewProxyClient(routeTable *RouteTable, routeUrl string, httpCli *http.Client, responseWriter responseWriter, ignoredPaths []string, onErr func(error, string), onReqRead func([]byte, string), onResRead func([]byte, string)) *ProxyClient {
+	pc := &ProxyClient{
+		routeTable:     routeTable,
+		routeUrl:       routeUrl,
+		httpCli:        httpCli,
+		responseWriter: responseWriter,
 
 		onErr:     onErr,
 		onReqRead: onReqRead,
 		onResRead: onResRead,
-	}, nil
+	}
+
+	pc.ignoredPaths = make(map[string]bool, len(ignoredPaths))
+	for _, path := range ignoredPaths {
+		pc.ignoredPaths[path] = true
+	}
+	return pc
 }
 
 // HandleRequestAndRedirect can be registered to http.Handle() for redirecting requests to desired url.
 func (pc *ProxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
-	sessionID, err := pc.shortIDGenerator.Generate()
-	if err != nil {
-		if pc.onErr != nil {
-			pc.onErr(err, sessionID)
-		}
-		writtenRes, err := pc.responseWriter.WriteCustomJsonResponse(w, http.StatusInternalServerError, map[string]interface{}{
-			"message": "internal server error",
-		})
-		if err != nil {
-			if pc.onErr != nil {
-				pc.onErr(err, sessionID)
-			}
-			return
-		}
-		if pc.onResRead != nil {
-			pc.onReqRead(writtenRes, sessionID)
-		}
+	if pc.ignoredPaths[r.URL.RequestURI()] {
+		w.Write(nil)
 		return
 	}
+
+	sessionID := gl_session.NewID()
 
 	uri := r.URL.RequestURI()
 
