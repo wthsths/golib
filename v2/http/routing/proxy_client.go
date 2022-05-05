@@ -96,7 +96,7 @@ func (pc *ProxyClient) HandleRequestAndRedirect(w http.ResponseWriter, r *http.R
 				return
 			}
 			if pc.onResRead != nil {
-				pc.onReqRead(writtenRes, sessionID)
+				pc.onResRead(writtenRes, sessionID)
 			}
 		}
 
