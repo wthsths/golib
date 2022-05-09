@@ -42,7 +42,7 @@ type Logger interface {
 //
 // Creating a logger instance before the execution of Init will produce a panic.
 func Init(name, dir string) error {
-	err := glogInit(name, dir)
+	err := logInit(name, dir)
 	if err != nil {
 		return err
 	}
@@ -97,10 +97,10 @@ func (l *logger) Infof(format string, args ...interface{}) {
 	log := l.getStructuredLog(logTypeInfo, formatted)
 
 	if writeToFileSystem {
-		infoln(log)
-	} else {
-		fmt.Println(log)
+		writeLn(log)
 	}
+	fmt.Println(log)
+
 }
 
 func (l *logger) Warnf(format string, args ...interface{}) {
@@ -112,10 +112,9 @@ func (l *logger) Warnf(format string, args ...interface{}) {
 	log := l.getStructuredLog(logTypeWarn, formatted)
 
 	if writeToFileSystem {
-		warningln(log)
-	} else {
-		fmt.Println(log)
+		writeLn(log)
 	}
+	fmt.Println(log)
 }
 
 func (l *logger) Errorf(format string, args ...interface{}) {
@@ -127,10 +126,9 @@ func (l *logger) Errorf(format string, args ...interface{}) {
 	log := l.getStructuredLog(logTypeError, formatted)
 
 	if writeToFileSystem {
-		errorln(log)
-	} else {
-		fmt.Println(log)
+		writeLn(log)
 	}
+	fmt.Println(log)
 }
 
 func (l *logger) Fatalf(format string, args ...interface{}) {
@@ -142,10 +140,9 @@ func (l *logger) Fatalf(format string, args ...interface{}) {
 	log := l.getStructuredLog(logTypeFatal, formatted)
 
 	if writeToFileSystem {
-		fatalln(log)
-	} else {
-		fmt.Println(log)
+		writeLn(log)
 	}
+	fmt.Println(log)
 }
 
 func (l *logger) getStructuredLog(logType, content string) string {
