@@ -25,7 +25,13 @@ func logInit(name, dir string) error {
 		newLine = "\r\n"
 	}
 
-	fullPath := dir + pathSeparator + name + pathSeparator + "temp"
+	logDir := dir + pathSeparator + name
+	fullPath := logDir + pathSeparator + "temp"
+
+	err := os.MkdirAll(logDir, os.ModePerm)
+	if err != nil {
+		return err
+	}
 
 	f, err := os.OpenFile(fullPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {

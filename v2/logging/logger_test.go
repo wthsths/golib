@@ -2,11 +2,17 @@ package gl_logging
 
 import (
 	"fmt"
+	"runtime"
 	"testing"
 )
 
 func Test_Logger(t *testing.T) {
-	Init("temp-svc", `C:\logs`)
+	logBase := `/tmp`
+	if runtime.GOOS == "windows" {
+		logBase = `C:\logs`
+	}
+
+	Init("temp-svc", logBase)
 
 	logger := NewLogger("some-title", "session-id")
 
