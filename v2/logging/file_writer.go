@@ -43,7 +43,10 @@ func logInit(name, dir string) error {
 		return err
 	}
 
-	f.Close()
+	err = f.Close()
+	if err != nil {
+		return err
+	}
 
 	err = os.Remove(fullPath)
 	if err != nil {
