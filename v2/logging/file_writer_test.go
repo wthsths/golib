@@ -3,6 +3,7 @@ package gl_logging
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -20,6 +21,11 @@ func Test_Write_Cached(t *testing.T) {
 		logBase = `C:\logs`
 		sep = `\`
 		nl = "\r\n"
+	}
+
+	err := os.RemoveAll(logBase + sep + logSubDir)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	logInit(logSubDir, logBase)
