@@ -18,8 +18,6 @@ const (
 var isInitialized = false
 var writeToFileSystem = true
 
-/* "glog" implementation is built upon: "https://github.com/birlesikodeme/glog" */
-
 // Logger is an abstract representation of sessionLogger.
 //
 // Actual implementation is built upon a modified version of glog.

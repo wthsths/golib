@@ -2,6 +2,7 @@ package gl_session
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 )
@@ -20,6 +21,22 @@ func Test_NewShortID(t *testing.T) {
 		}
 
 		generatedIDs[newID] = true
+	}
+}
+
+func Test_NewShort_Invalid_Characters(t *testing.T) {
+	testSize := 1000000
+
+	for i := 0; i < testSize; i++ {
+		newID := NewID()
+
+		if strings.Contains(newID, "[") {
+			t.Fatalf("index %d contains '['", i)
+		}
+
+		if strings.Contains(newID, "]") {
+			t.Fatalf("index %d contains ']'", i)
+		}
 	}
 }
 

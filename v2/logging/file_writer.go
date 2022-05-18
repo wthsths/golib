@@ -4,6 +4,8 @@ import (
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var pathSeparator = "/"
@@ -13,12 +15,14 @@ var cachedDir = ""
 
 var cachedLogFilename = ""
 var cachedLogFile *os.File
+var fileNameSuffix = ""
 
 var timeModMinute int
 
 func logInit(name, dir string) error {
 	cachedName = name
 	cachedDir = dir
+	fileNameSuffix = uuid.NewString()
 
 	if runtime.GOOS == "windows" {
 		pathSeparator = `\`
@@ -26,7 +30,7 @@ func logInit(name, dir string) error {
 	}
 
 	logDir := dir + pathSeparator + name
-	fullPath := logDir + pathSeparator + "temp"
+	fullPath := logDir + pathSeparator + "temp_" + fileNameSuffix
 
 	err := os.MkdirAll(logDir, os.ModePerm)
 	if err != nil {
@@ -57,7 +61,7 @@ func logInit(name, dir string) error {
 }
 
 func writeLn(content string) {
-	designatedFilename := time.Now().UTC().Add(time.Minute * time.Duration(timeModMinute)).Format("20060102")
+	designatedFilename := time.Now().UTC().Add(time.Minute*time.Duration(timeModMinute)).Format("20060102") + fileNameSuffix
 
 	logDir := cachedDir + pathSeparator + cachedName
 	logPath := logDir + pathSeparator + designatedFilename
