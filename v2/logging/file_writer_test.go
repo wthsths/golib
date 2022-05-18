@@ -75,6 +75,6 @@ func Test_Write_Cached(t *testing.T) {
 	}
 
 	if len(parseMap) != iterations {
-		t.Fatal()
+		t.Fatalf("expected: %d got: %d", iterations, len(parseMap))
 	}
 }

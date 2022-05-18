@@ -61,7 +61,7 @@ func logInit(name, dir string) error {
 }
 
 func writeLn(content string) {
-	designatedFilename := time.Now().UTC().Add(time.Minute*time.Duration(timeModMinute)).Format("20060102") + fileNameSuffix
+	designatedFilename := time.Now().UTC().Add(time.Minute*time.Duration(timeModMinute)).Format("20060102") + "_" + fileNameSuffix
 
 	logDir := cachedDir + pathSeparator + cachedName
 	logPath := logDir + pathSeparator + designatedFilename
