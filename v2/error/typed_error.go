@@ -6,6 +6,7 @@ const (
 	CodeUndefinedErr TypedErrorCode = 0
 	CodeInternalErr  TypedErrorCode = 1
 	CodeAuthErr      TypedErrorCode = 2
+	CodeBadInput     TypedErrorCode = 3
 )
 
 // TypedError wraps a go error and an additional TypedErrorCode value for handling errors with higher precision.
