@@ -20,12 +20,12 @@ func NewAesEncryptor(key string) *aesEncryptor {
 }
 
 func GenerateKey(bitSize int) (string, error) {
-	if bitSize%16 != 0 || bitSize < 0 {
+	if bitSize%8 != 0 || bitSize <= 0 {
 		return "", fmt.Errorf("invalid bit size")
 	}
 
-	// 1 byte = 8 bits, but hexadecimal string will double in size so...
-	randomKey := make([]byte, bitSize/16)
+	// 1 byte = 8 bits
+	randomKey := make([]byte, bitSize/8)
 	_, err := rand.Read(randomKey)
 	if err != nil {
 		return "", err
@@ -34,7 +34,12 @@ func GenerateKey(bitSize int) (string, error) {
 }
 
 func (e *aesEncryptor) Encrypt(in string) ([]byte, error) {
-	block, err := aes.NewCipher([]byte(e.key))
+	decodedKey, err := hex.DecodeString(e.key)
+	if err != nil {
+		return nil, err
+	}
+
+	block, err := aes.NewCipher(decodedKey)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +59,12 @@ func (e *aesEncryptor) Encrypt(in string) ([]byte, error) {
 }
 
 func (e *aesEncryptor) Decrypt(in []byte) (string, error) {
-	block, err := aes.NewCipher([]byte(e.key))
+	decodedKey, err := hex.DecodeString(e.key)
+	if err != nil {
+		return "", err
+	}
+
+	block, err := aes.NewCipher(decodedKey)
 	if err != nil {
 		return "", err
 	}
