@@ -159,6 +159,54 @@ func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, h
 	return httpRes.Header, bodyBytes, httpRes.StatusCode, nil
 }
 
+// Do sends a http request using a struct as payload with given http verb.
+func (w *WebRequestClient) Do(ctx context.Context, method, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
+	reqAsBytes, err := w.marshalFunc(request)
+	if err != nil {
+		errStr := fmt.Errorf("could not convert request to byte array: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+
+	if queryParams != nil {
+		params := url.Values{}
+		for k, v := range queryParams {
+			params.Add(k, fmt.Sprint(v))
+		}
+		uri = uri + "?" + params.Encode()
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, method, uri, bytes.NewBuffer(reqAsBytes))
+	if err != nil {
+		errStr := fmt.Errorf("could not create new request: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+
+	for k, v := range headers {
+		httpReq.Header.Set(k, v)
+	}
+
+	httpRes, err := w.client.Do(httpReq)
+	if err != nil {
+		errStr := fmt.Errorf("error executing request: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+
+	defer httpRes.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(httpRes.Body)
+	if err != nil {
+		errStr := fmt.Errorf("could not read response body: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+
+	err = w.unmarshalFunc(bodyBytes, responseParser)
+	if err != nil {
+		errStr := fmt.Errorf("could not unmarshal response into input interface: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+	return httpRes.Header, bodyBytes, httpRes.StatusCode, nil
+}
+
 func (w *WebRequestClient) CreateBasicAuthHeaderValue(username, password string) string {
 	auth := username + ":" + password
 	encoded := base64.StdEncoding.EncodeToString([]byte(auth))
