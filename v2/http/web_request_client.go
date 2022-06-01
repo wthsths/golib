@@ -212,3 +212,45 @@ func (w *WebRequestClient) CreateBasicAuthHeaderValue(username, password string)
 	encoded := base64.StdEncoding.EncodeToString([]byte(auth))
 	return "Basic " + encoded
 }
+
+// DoSerializedBody sends a http request with a string payload with given http verb.
+func (w *WebRequestClient) DoSerializedBody(ctx context.Context, method, uri string, headers map[string]string, queryParams map[string]interface{}, request string, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
+	if queryParams != nil {
+		params := url.Values{}
+		for k, v := range queryParams {
+			params.Add(k, fmt.Sprint(v))
+		}
+		uri = uri + "?" + params.Encode()
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, method, uri, bytes.NewBuffer([]byte(request)))
+	if err != nil {
+		errStr := fmt.Errorf("could not create new request: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+
+	for k, v := range headers {
+		httpReq.Header.Set(k, v)
+	}
+
+	httpRes, err := w.client.Do(httpReq)
+	if err != nil {
+		errStr := fmt.Errorf("error executing request: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+
+	defer httpRes.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(httpRes.Body)
+	if err != nil {
+		errStr := fmt.Errorf("could not read response body: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+
+	err = w.unmarshalFunc(bodyBytes, responseParser)
+	if err != nil {
+		errStr := fmt.Errorf("could not unmarshal response into input interface: %s", err.Error())
+		return nil, nil, 0, errStr
+	}
+	return httpRes.Header, bodyBytes, httpRes.StatusCode, nil
+}
