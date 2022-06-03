@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	gl_constants "github.com/payports/golib/v2/constants"
+	gl_constants "github.com/payports/golib/v3/constants"
 )
 
 type ResponseWriter struct {

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	gl_session "github.com/payports/golib/v2/session"
+	gl_session "github.com/payports/golib/v3/session"
 )
 
 type responseWriter interface {
