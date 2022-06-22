@@ -71,10 +71,14 @@ func (w *WebRequestClient) Get(ctx context.Context, uri string, headers map[stri
 //
 // Use PostSerializedBody method if your payload input is string.
 func (w *WebRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
-	reqAsBytes, err := w.marshalFunc(request)
-	if err != nil {
-		errStr := fmt.Errorf("could not convert request to byte array: %s", err.Error())
-		return nil, nil, 0, errStr
+	var reqAsBytes []byte
+
+	if request != nil {
+		reqAsBytes, err = w.marshalFunc(request)
+		if err != nil {
+			errStr := fmt.Errorf("could not convert request to byte array: %s", err.Error())
+			return nil, nil, 0, errStr
+		}
 	}
 
 	if queryParams != nil {
@@ -161,10 +165,14 @@ func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, h
 
 // Do sends a http request using a struct as payload with given http verb.
 func (w *WebRequestClient) Do(ctx context.Context, method, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
-	reqAsBytes, err := w.marshalFunc(request)
-	if err != nil {
-		errStr := fmt.Errorf("could not convert request to byte array: %s", err.Error())
-		return nil, nil, 0, errStr
+	var reqAsBytes []byte
+
+	if request != nil {
+		reqAsBytes, err = w.marshalFunc(request)
+		if err != nil {
+			errStr := fmt.Errorf("could not convert request to byte array: %s", err.Error())
+			return nil, nil, 0, errStr
+		}
 	}
 
 	if queryParams != nil {
