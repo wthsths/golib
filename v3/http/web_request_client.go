@@ -26,7 +26,7 @@ func NewWebRequestClient(client *http.Client, marshalFunc func(v interface{}) ([
 }
 
 // Get sends a GET http request.
-func (w *WebRequestClient) Get(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
+func (w *WebRequestClient) Get(ctx context.Context, uri string, headers map[string]string, queryParams map[string]string, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
 	if queryParams != nil {
 		params := url.Values{}
 		for k, v := range queryParams {
@@ -70,7 +70,7 @@ func (w *WebRequestClient) Get(ctx context.Context, uri string, headers map[stri
 // Post sends a POST http request using a struct as payload.
 //
 // Use PostSerializedBody method if your payload input is string.
-func (w *WebRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
+func (w *WebRequestClient) Post(ctx context.Context, uri string, headers map[string]string, queryParams map[string]string, request, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
 	var reqAsBytes []byte
 
 	if request != nil {
@@ -122,7 +122,7 @@ func (w *WebRequestClient) Post(ctx context.Context, uri string, headers map[str
 }
 
 // PostSerializedBody sends a POST http request with a string payload.
-func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, headers map[string]string, queryParams map[string]interface{}, request string, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
+func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, headers map[string]string, queryParams map[string]string, request string, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
 	if queryParams != nil {
 		params := url.Values{}
 		for k, v := range queryParams {
@@ -164,7 +164,7 @@ func (w *WebRequestClient) PostSerializedBody(ctx context.Context, uri string, h
 }
 
 // Do sends a http request using a struct as payload with given http verb.
-func (w *WebRequestClient) Do(ctx context.Context, method, uri string, headers map[string]string, queryParams map[string]interface{}, request, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
+func (w *WebRequestClient) Do(ctx context.Context, method, uri string, headers map[string]string, queryParams map[string]string, request, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
 	var reqAsBytes []byte
 
 	if request != nil {
@@ -222,7 +222,7 @@ func (w *WebRequestClient) CreateBasicAuthHeaderValue(username, password string)
 }
 
 // DoSerializedBody sends a http request with a string payload with given http verb.
-func (w *WebRequestClient) DoSerializedBody(ctx context.Context, method, uri string, headers map[string]string, queryParams map[string]interface{}, request string, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
+func (w *WebRequestClient) DoSerializedBody(ctx context.Context, method, uri string, headers map[string]string, queryParams map[string]string, request string, responseParser interface{}) (resHeaders http.Header, resBody []byte, statusCode int, err error) {
 	if queryParams != nil {
 		params := url.Values{}
 		for k, v := range queryParams {
