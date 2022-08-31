@@ -22,8 +22,12 @@ func TestRegExRouteExConversions(t *testing.T) {
 			routeex: `abc/{guid}/abc`,
 		},
 		{
-			regex:   `abc/(?P<param1>\S+)/abc/(?P<param2>\S+)`,
-			routeex: `abc/{param1}/abc/{param2}`,
+			regex:   `abc/(?P<param1>\S+)/abcd/(?P<param2>\S+)`,
+			routeex: `abc/{param1}/abcd/{param2}`,
+		},
+		{
+			regex:   `/api/transfers/(?P<id>\S+)/something/(?P<ref>\S+)`,
+			routeex: `/api/transfers/{id}/something/{ref}`,
 		},
 	}
 
