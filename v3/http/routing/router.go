@@ -10,7 +10,7 @@ import (
 type Router struct {
 	staticPaths  map[string]*RouteRule
 	dynamicPaths []*RouteRule
-	allPaths     map[string]bool
+	allPaths     map[string]string
 }
 
 // NewRouter creates http router from input routeRules.
@@ -20,15 +20,15 @@ func NewRouter(routeRules []*RouteRule) (*Router, error) {
 	router := &Router{
 		staticPaths:  make(map[string]*RouteRule, len(routeRules)),
 		dynamicPaths: make([]*RouteRule, 0, len(routeRules)),
-		allPaths:     make(map[string]bool, len(routeRules)),
+		allPaths:     make(map[string]string, len(routeRules)),
 	}
 
 	for _, r := range routeRules {
-		_, ok := router.allPaths[r.Path]
-		if ok {
-			return nil, fmt.Errorf("path: '%s' is registered multiple times", r.Path)
+		path, ok := router.allPaths[r.Path]
+		if ok && path == r.Method {
+			return nil, fmt.Errorf("path: '%s' is registered multiple times to method: '%s'", r.Path, r.Method)
 		}
-		router.allPaths[r.Path] = true
+		router.allPaths[r.Path] = r.Method
 
 		if !r.DynamicPath {
 			router.staticPaths[r.Path] = r
